@@ -1,11 +1,21 @@
 {
-  "authors": [
-    "Nathan Rajlich <nathan@tootallnate.net> (http://n8.io/)",
-    "Félicien François <felicien@tweakstyle.com>",
-    "Microsoft Corporation"
-  ],
+  "name": "@vscode/proxy-agent",
+  "version": "0.19.1",
+  "description": "NodeJS http(s) agent implementation for VS Code",
+  "homepage": "https://github.com/microsoft/vscode-proxy-agent",
   "bugs": {
     "url": "https://github.com/microsoft/vscode-proxy-agent/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/microsoft/vscode-proxy-agent.git"
+  },
+  "license": "MIT",
+  "main": "out/index.js",
+  "types": "out/index.d.ts",
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
   },
   "dependencies": {
     "@tootallnate/once": "3.0.0",
@@ -15,27 +25,17 @@
     "https-proxy-agent": "7.0.2",
     "socks-proxy-agent": "8.0.1"
   },
-  "description": "NodeJS http(s) agent implementation for VS Code",
   "devDependencies": {
     "@types/debug": "4.1.9",
     "@types/node": "20.8.4",
     "typescript": "5.2.2"
   },
-  "homepage": "https://github.com/microsoft/vscode-proxy-agent",
-  "license": "MIT",
-  "main": "out/index.js",
-  "name": "@vscode/proxy-agent",
   "optionalDependencies": {
     "@vscode/windows-ca-certs": "0.3.1"
   },
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/microsoft/vscode-proxy-agent.git"
-  },
-  "scripts": {
-    "compile": "tsc -p ./",
-    "watch": "tsc -watch -p ./"
-  },
-  "types": "out/index.d.ts",
-  "version": "0.19.1"
+  "authors": [
+    "Nathan Rajlich <nathan@tootallnate.net> (http://n8.io/)",
+    "Félicien François <felicien@tweakstyle.com>",
+    "Microsoft Corporation"
+  ]
 }
