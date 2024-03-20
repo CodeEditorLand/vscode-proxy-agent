@@ -1,22 +1,39 @@
 {
-  "name": "test-client",
-  "version": "1.0.0",
-  "description": "",
-  "main": "test.js",
-  "scripts": {
-    "test": "mocha -r ts-node/register $MOCHA_TESTS",
-    "test:watch": "npm test -- -w --watch-extensions ts"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "devDependencies": {
-    "@types/kerberos": "1.1.5",
-    "@types/mocha": "10.0.6",
-    "@types/node": "20.11.30",
-    "kerberos": "2.1.0",
-    "mocha": "10.3.0",
-    "ts-node": "10.9.2",
-    "typescript": "5.4.2"
-  }
+	"name": "test-client",
+	"version": "0.0.1",
+	"private": false,
+	"description": "",
+	"homepage": "https://github.com/CodeEditorLand/Foundation#readme",
+	"bugs": {
+		"url": "https://github.com/CodeEditorLand/Foundation/issues"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/CodeEditorLand/Foundation.git"
+	},
+	"license": "SEE LICENSE IN LICENSE",
+	"author": {
+		"name": "Playform",
+		"email": "Hello@Playform.Cloud",
+		"url": "https://playform.cloud"
+	},
+	"type": "module",
+	"main": "test.js",
+	"scripts": {
+		"prepublishOnly": "TypeScriptESBuild 'Source/**/*.ts'",
+		"test:watch": "npm test -- -w --watch-extensions ts"
+	},
+	"devDependencies": {
+		"@types/kerberos": "1.1.5",
+		"@types/mocha": "10.0.6",
+		"@types/node": "20.11.30",
+		"kerberos": "2.1.0",
+		"mocha": "10.3.0",
+		"ts-node": "10.9.2",
+		"typescript": "5.4.2",
+		"typescript-esbuild": "latest"
+	},
+	"publishConfig": {
+		"access": "public"
+	}
 }
