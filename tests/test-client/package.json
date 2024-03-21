@@ -1,28 +1,5 @@
 {
-	"name": "test-client",
-	"version": "0.0.1",
-	"private": false,
 	"description": "",
-	"homepage": "https://github.com/CodeEditorLand/Foundation#readme",
-	"bugs": {
-		"url": "https://github.com/CodeEditorLand/Foundation/issues"
-	},
-	"repository": {
-		"type": "git",
-		"url": "git+https://github.com/CodeEditorLand/Foundation.git"
-	},
-	"license": "SEE LICENSE IN LICENSE",
-	"author": {
-		"name": "Playform",
-		"email": "Hello@Playform.Cloud",
-		"url": "https://playform.cloud"
-	},
-	"type": "module",
-	"main": "test.js",
-	"scripts": {
-		"prepublishOnly": "TypeScriptESBuild 'Source/**/*.ts'",
-		"test:watch": "npm test -- -w --watch-extensions ts"
-	},
 	"devDependencies": {
 		"@types/kerberos": "1.1.5",
 		"@types/mocha": "10.0.6",
@@ -33,7 +10,11 @@
 		"typescript": "5.4.2",
 		"typescript-esbuild": "0.4.5"
 	},
-	"publishConfig": {
-		"access": "public"
-	}
+	"main": "test.js",
+	"name": "test-client",
+	"scripts": {
+		"prepublishOnly": "TypeScriptESBuild 'Source/**/*.ts'",
+		"test:watch": "npm test -- -w --watch-extensions ts"
+	},
+	"type": "module"
 }
