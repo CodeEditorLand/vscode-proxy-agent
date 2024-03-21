@@ -37,7 +37,7 @@
 		"@types/debug": "4.1.12",
 		"@types/node": "20.11.30",
 		"typescript": "5.4.2",
-		"typescript-esbuild": "latest"
+		"typescript-esbuild": "0.4.5"
 	},
 	"optionalDependencies": {
 		"@vscode/windows-ca-certs": "0.3.1"
