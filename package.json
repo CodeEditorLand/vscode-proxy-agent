@@ -1,50 +1,54 @@
 {
-  "name": "@vscode/proxy-agent",
-  "version": "0.19.1",
-  "description": "NodeJS http(s) agent implementation for VS Code",
-  "main": "out/index.js",
-  "types": "out/index.d.ts",
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/microsoft/vscode-proxy-agent.git"
-  },
-  "keywords": [
-    "proxy",
-    "agent",
-    "http",
-    "https",
-    "socks",
-    "request",
-    "access"
-  ],
-  "authors": [
-    "Nathan Rajlich <nathan@tootallnate.net> (http://n8.io/)",
-    "Félicien François <felicien@tweakstyle.com>",
-    "Microsoft Corporation"
-  ],
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/microsoft/vscode-proxy-agent/issues"
-  },
-  "homepage": "https://github.com/microsoft/vscode-proxy-agent",
-  "dependencies": {
-    "@tootallnate/once": "^3.0.0",
-    "agent-base": "^7.0.1",
-    "debug": "^4.3.4",
-    "http-proxy-agent": "^7.0.0",
-    "https-proxy-agent": "^7.0.2",
-    "socks-proxy-agent": "^8.0.1"
-  },
-  "devDependencies": {
-    "@types/debug": "^4.1.9",
-    "@types/node": "^20.8.4",
-    "typescript": "^5.2.2"
-  },
-  "scripts": {
-    "compile": "tsc -p ./",
-    "watch": "tsc -watch -p ./"
-  },
-  "optionalDependencies": {
-    "@vscode/windows-ca-certs": "^0.3.1"
-  }
+	"name": "@vscode/proxy-agent",
+	"version": "0.0.1",
+	"private": false,
+	"description": "NodeJS http(s) agent implementation for VS Code",
+	"keywords": [
+		"land"
+	],
+	"homepage": "HTTPS://GitHub.Com/CodeEditorLand/LandProxyAgent#readme",
+	"bugs": {
+		"url": "HTTPS://GitHub.Com/CodeEditorLand/LandProxyAgent/issues"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+HTTPS://github.com/CodeEditorLand/LandProxyAgent.git"
+	},
+	"license": "SEE LICENSE IN LICENSE",
+	"author": {
+		"name": "🌆 — Land —",
+		"email": "Land@PlayForm.Cloud",
+		"url": "HTTPS://Land.PlayForm.Cloud"
+	},
+	"type": "module",
+	"main": "out/index.js",
+	"types": "out/index.d.ts",
+	"scripts": {
+		"Document": "Document 'Source/**/*.ts'",
+		"compile": "tsc -p ./",
+		"prepublishOnly": "Build 'Source/**/*.ts'"
+	},
+	"dependencies": {
+		"@tootallnate/once": "^3.0.0",
+		"agent-base": "^7.0.1",
+		"debug": "^4.3.4",
+		"http-proxy-agent": "^7.0.0",
+		"https-proxy-agent": "^7.0.2",
+		"socks-proxy-agent": "^8.0.1"
+	},
+	"devDependencies": {
+		"@playform/build": "0.0.7",
+		"@playform/document": "0.0.6",
+		"@types/debug": "^4.1.9",
+		"@types/node": "^20.8.4"
+	},
+	"optionalDependencies": {},
+	"publishConfig": {
+		"access": "public"
+	},
+	"authors": [
+		"Nathan Rajlich <nathan@tootallnate.net> (http://n8.io/)",
+		"Félicien François <felicien@tweakstyle.com>",
+		"Microsoft Corporation"
+	]
 }
