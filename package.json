@@ -40,7 +40,7 @@
 		"@playform/build": "0.0.7",
 		"@playform/document": "0.0.6",
 		"@types/debug": "4.1.12",
-		"@types/node": "20.12.7"
+		"@types/node": "20.12.10"
 	},
 	"optionalDependencies": {},
 	"publishConfig": {
