@@ -1,26 +1,6 @@
 {
 	"name": "@vscode/proxy-agent",
-	"version": "0.0.1",
-	"private": false,
 	"description": "NodeJS http(s) agent implementation for VS Code",
-	"keywords": [
-		"land"
-	],
-	"homepage": "HTTPS://GitHub.Com/CodeEditorLand/LandProxyAgent#readme",
-	"bugs": {
-		"url": "HTTPS://GitHub.Com/CodeEditorLand/LandProxyAgent/issues"
-	},
-	"repository": {
-		"type": "git",
-		"url": "git+HTTPS://github.com/CodeEditorLand/LandProxyAgent.git"
-	},
-	"license": "SEE LICENSE IN LICENSE",
-	"author": {
-		"name": "🛬 Land —",
-		"email": "Land@PlayForm.Cloud",
-		"url": "HTTPS://Land.PlayForm.Cloud"
-	},
-	"type": "module",
 	"main": "out/index.js",
 	"types": "out/index.d.ts",
 	"scripts": {
@@ -38,14 +18,10 @@
 	},
 	"devDependencies": {
 		"@playform/build": "0.0.7",
-		"@playform/document": "0.0.6",
 		"@types/debug": "4.1.12",
 		"@types/node": "20.12.10"
 	},
 	"optionalDependencies": {},
-	"publishConfig": {
-		"access": "public"
-	},
 	"authors": [
 		"Nathan Rajlich <nathan@tootallnate.net> (http://n8.io/)",
 		"Félicien François <felicien@tweakstyle.com>",
