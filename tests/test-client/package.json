@@ -1,0 +1,22 @@
+{
+  "name": "test-client",
+  "version": "1.0.0",
+  "description": "",
+  "main": "test.js",
+  "scripts": {
+    "test": "mocha -r ts-node/register $MOCHA_TESTS",
+    "test:watch": "npm test -- -w --watch-extensions ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/kerberos": "1.1.5",
+    "@types/mocha": "10.0.6",
+    "@types/node": "20.14.5",
+    "kerberos": "2.1.0",
+    "mocha": "10.4.0",
+    "ts-node": "10.9.2",
+    "typescript": "5.4.5"
+  }
+}
