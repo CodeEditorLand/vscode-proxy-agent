@@ -1,9 +1,11 @@
 {
-	"authors": [
-		"Nathan Rajlich <nathan@tootallnate.net> (http://n8.io/)",
-		"Félicien François <felicien@tweakstyle.com>",
-		"Microsoft Corporation"
-	],
+	"name": "@vscode/proxy-agent",
+	"description": "NodeJS http(s) agent implementation for VS Code",
+	"main": "out/index.js",
+	"types": "out/index.d.ts",
+	"scripts": {
+		"compile": "tsc -p ./"
+	},
 	"dependencies": {
 		"@tootallnate/once": "3.0.0",
 		"agent-base": "7.0.1",
@@ -12,16 +14,14 @@
 		"https-proxy-agent": "7.0.2",
 		"socks-proxy-agent": "8.0.1"
 	},
-	"description": "NodeJS http(s) agent implementation for VS Code",
 	"devDependencies": {
 		"@types/debug": "4.1.9",
 		"@types/node": "20.8.4"
 	},
-	"main": "out/index.js",
-	"name": "@vscode/proxy-agent",
 	"optionalDependencies": {},
-	"scripts": {
-		"compile": "tsc -p ./"
-	},
-	"types": "out/index.d.ts"
+	"authors": [
+		"Nathan Rajlich <nathan@tootallnate.net> (http://n8.io/)",
+		"Félicien François <felicien@tweakstyle.com>",
+		"Microsoft Corporation"
+	]
 }
