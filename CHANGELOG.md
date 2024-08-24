@@ -2,6 +2,9 @@
 
 Notable changes will be documented here.
 
+## [0.23.0]
+- Pass on keepAlive flag ([microsoft/vscode#173861](https://github.com/microsoft/vscode/issues/173861))
+
 ## [0.22.0]
 
 -   Set agent protocol
