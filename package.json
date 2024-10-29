@@ -15,7 +15,7 @@
 	"description": "NodeJS http(s) agent implementation for VS Code",
 	"devDependencies": {
 		"@types/debug": "4.1.12",
-		"@types/node": "22.8.1"
+		"@types/node": "22.8.2"
 	},
 	"main": "out/index.js",
 	"name": "@vscode/proxy-agent",
