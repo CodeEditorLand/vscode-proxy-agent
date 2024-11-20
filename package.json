@@ -7,16 +7,16 @@
 		"compile": "tsc -p ./"
 	},
 	"dependencies": {
-		"@tootallnate/once": "^3.0.0",
-		"agent-base": "^7.1.1",
-		"debug": "^4.3.7",
-		"http-proxy-agent": "^7.0.2",
-		"https-proxy-agent": "^7.0.5",
-		"socks-proxy-agent": "^8.0.4"
+		"@tootallnate/once": "3.0.0",
+		"agent-base": "7.1.1",
+		"debug": "4.3.7",
+		"http-proxy-agent": "7.0.2",
+		"https-proxy-agent": "7.0.5",
+		"socks-proxy-agent": "8.0.4"
 	},
 	"devDependencies": {
-		"@types/debug": "^4.1.12",
-		"@types/node": "^22.9.1"
+		"@types/debug": "4.1.12",
+		"@types/node": "22.9.1"
 	},
 	"optionalDependencies": {},
 	"authors": [
