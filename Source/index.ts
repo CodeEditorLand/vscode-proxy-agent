@@ -33,6 +33,7 @@ export type ProxyResolveEvent = {
 	cacheSize: number;
 	cacheRolls: number;
 	envCount: number;
+
 	settingsCount: number;
 	localhostCount: number;
 	envNoProxyCount: number;
@@ -61,6 +62,7 @@ export interface Log {
 
 export interface ProxyAgentParams {
 	resolveProxy(url: string): Promise<string | undefined>;
+
 	getProxyURL: () => string | undefined,
 	getProxySupport: () => ProxySupportSetting,
 	getNoProxyConfig?: () => string[],
@@ -69,6 +71,7 @@ export interface ProxyAgentParams {
 	loadAdditionalCertificates(): Promise<string[]>;
 	lookupProxyAuthorization?: LookupProxyAuthorization;
 	log: Log;
+
 	getLogLevel(): LogLevel;
 	proxyResolveTelemetry(event: ProxyResolveEvent): void;
 	useHostProxy: boolean;
@@ -77,23 +80,29 @@ export interface ProxyAgentParams {
 
 export function createProxyResolver(params: ProxyAgentParams) {
 	const { getProxyURL, log, proxyResolveTelemetry: proxyResolverTelemetry, env } = params;
+
 	let envProxy = proxyFromConfigURL(env.https_proxy || env.HTTPS_PROXY || env.http_proxy || env.HTTP_PROXY); // Not standardized.
 
 	let envNoProxy = noProxyFromEnv(env.no_proxy || env.NO_PROXY); // Not standardized.
 
 	let cacheRolls = 0;
+
 	let oldCache = new Map<string, string>();
+
 	let cache = new Map<string, string>();
+
 	function getCacheKey(url: nodeurl.UrlWithStringQuery) {
 		// Expecting proxies to usually be the same per scheme://host:port. Assuming that for performance.
 		return nodeurl.format({ ...url, ...{ pathname: undefined, search: undefined, hash: undefined } });
 	}
 	function getCachedProxy(key: string) {
 		let proxy = cache.get(key);
+
 		if (proxy) {
 			return proxy;
 		}
 		proxy = oldCache.get(key);
+
 		if (proxy) {
 			oldCache.delete(key);
 			cacheProxy(key, proxy);
@@ -102,6 +111,7 @@ export function createProxyResolver(params: ProxyAgentParams) {
 	}
 	function cacheProxy(key: string, proxy: string) {
 		cache.set(key, proxy);
+
 		if (cache.size >= maxCacheEntries) {
 			oldCache = cache;
 			cache = new Map();
@@ -111,16 +121,27 @@ export function createProxyResolver(params: ProxyAgentParams) {
 	}
 
 	let timeout: NodeJS.Timer | undefined;
+
 	let count = 0;
+
 	let duration = 0;
+
 	let errorCount = 0;
+
 	let cacheCount = 0;
+
 	let envCount = 0;
+
 	let settingsCount = 0;
+
 	let localhostCount = 0;
+
 	let envNoProxyCount = 0;
+
 	let configNoProxyCount = 0;
+
 	let results: ConnectionResult[] = [];
+
 	function logEvent() {
 		timeout = undefined;
 		proxyResolverTelemetry({ count, duration, errorCount, cacheCount, cacheSize: cache.size, cacheRolls, envCount, settingsCount, localhostCount, envNoProxyCount, configNoProxyCount, results });
@@ -138,6 +159,7 @@ export function createProxyResolver(params: ProxyAgentParams) {
 		addCertificatesV1(params, flags.addCertificatesV1, opts, () => {
 			if (!flags.useProxySettings) {
 				callback('DIRECT');
+
 				return;
 			}
 			useProxySettings(url, req, stackText, callback);
@@ -148,24 +170,29 @@ export function createProxyResolver(params: ProxyAgentParams) {
 		const parsedUrl = nodeurl.parse(url); // Coming from Node's URL, sticking with that.
 
 		const hostname = parsedUrl.hostname;
+
 		if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1' || hostname === '::ffff:127.0.0.1') {
 			localhostCount++;
 			callback('DIRECT');
 			log.debug('ProxyResolver#resolveProxy localhost', url, 'DIRECT', stackText);
+
 			return;
 		}
 
 		const secureEndpoint = parsedUrl.protocol === 'https:';
+
 		const defaultPort = secureEndpoint ? 443 : 80;
 
 		// if there are any config entries present then env variables are ignored
 		let noProxyConfig = params.getNoProxyConfig ? params.getNoProxyConfig() : [];
+
 		if (noProxyConfig.length) {
 			let configNoProxy = noProxyFromConfig(noProxyConfig); // Not standardized.
 			if (typeof hostname === 'string' && configNoProxy(hostname, String(parsedUrl.port || defaultPort))) {
 				configNoProxyCount++;
 				callback('DIRECT');
 				log.debug('ProxyResolver#resolveProxy configNoProxy', url, 'DIRECT', stackText);
+
 				return;
 			}
 		} else {
@@ -173,15 +200,18 @@ export function createProxyResolver(params: ProxyAgentParams) {
 				envNoProxyCount++;
 				callback('DIRECT');
 				log.debug('ProxyResolver#resolveProxy envNoProxy', url, 'DIRECT', stackText);
+
 				return;
 			}	
 		}
 
 		let settingsProxy = proxyFromConfigURL(getProxyURL());
+
 		if (settingsProxy) {
 			settingsCount++;
 			callback(settingsProxy);
 			log.debug('ProxyResolver#resolveProxy settings', url, settingsProxy, stackText);
+
 			return;
 		}
 
@@ -189,24 +219,30 @@ export function createProxyResolver(params: ProxyAgentParams) {
 			envCount++;
 			callback(envProxy);
 			log.debug('ProxyResolver#resolveProxy env', url, envProxy, stackText);
+
 			return;
 		}
 
 		const key = getCacheKey(parsedUrl);
+
 		const proxy = getCachedProxy(key);
+
 		if (proxy) {
 			cacheCount++;
+
 			if (req) {
 				collectResult(results, proxy, secureEndpoint ? 'HTTPS' : 'HTTP', req);
 			}
 			callback(proxy);
 			log.debug('ProxyResolver#resolveProxy cached', url, proxy, stackText);
+
 			return;
 		}
 
 		if (!params.useHostProxy) {
 			callback('DIRECT');
 			log.debug('ProxyResolver#resolveProxy unconfigured', url, 'DIRECT', stackText);
+
 			return;
 		}
 
@@ -215,6 +251,7 @@ export function createProxyResolver(params: ProxyAgentParams) {
 			.then(proxy => {
 				if (proxy) {
 					cacheProxy(key, proxy);
+
 					if (req) {
 						collectResult(results, proxy, secureEndpoint ? 'HTTPS' : 'HTTP', req);
 					}
@@ -226,6 +263,7 @@ export function createProxyResolver(params: ProxyAgentParams) {
 				duration = Date.now() - start + duration;
 			}, err => {
 				errorCount++;
+
 				const fallback: string | undefined = cache.values().next().value; // fall back to any proxy (https://github.com/microsoft/vscode/issues/122825)
 				callback(fallback);
 				log.error('ProxyResolver#resolveProxy', fallback, toErrorMessage(err), stackText);
@@ -250,11 +288,13 @@ function collectResult(results: ConnectionResult[], resolveProxy: string, connec
 	const proxy = resolveProxy ? String(resolveProxy).trim().split(/\s+/, 1)[0] : 'EMPTY';
 	req.on('response', res => {
 		const code = `HTTP_${res.statusCode}`;
+
 		const result = findOrCreateResult(results, proxy, connection, code);
 		result.count++;
 	});
 	req.on('error', err => {
 		const code = err && typeof (<any>err).code === 'string' && (<any>err).code || 'UNKNOWN_ERROR';
+
 		const result = findOrCreateResult(results, proxy, connection, code);
 		result.count++;
 	});
@@ -268,6 +308,7 @@ function findOrCreateResult(results: ConnectionResult[], proxy: string, connecti
 	}
 	const result = { proxy, connection, code, count: 0 };
 	results.push(result);
+
 	return result;
 }
 
@@ -276,12 +317,16 @@ function proxyFromConfigURL(configURL: string | undefined) {
 		return undefined;
 	}
 	const url = (configURL || '').trim();
+
 	const i = url.indexOf('://');
+
 	if (i === -1) {
 		return undefined;
 	}
 	const scheme = url.substr(0, i).toLowerCase();
+
 	const proxy = url.substr(i + 3);
+
 	if (scheme === 'http') {
 		return 'PROXY ' + proxy;
 	} else if (scheme === 'https') {
@@ -304,8 +349,10 @@ function shouldBypassProxy(value: string[]) {
 		.filter(filter => !!filter.name)
 		.map(({ name, port }) => {
 			const domain = name[0] === '.' ? name : `.${name}`;
+
 			return { domain, port };
 		});
+
 	if (!filters.length) {
 		return () => false;
 	}
@@ -319,12 +366,14 @@ function noProxyFromEnv(envValue?: string) {
 		.trim()
 		.toLowerCase()
 		.split(',');
+
 	return shouldBypassProxy(value);
 }
 
 function noProxyFromConfig(noProxy: string[]) {
 	const value = noProxy
 		.map((item) => item.trim().toLowerCase());
+
 	return shouldBypassProxy(value);
 }
 
@@ -356,24 +405,31 @@ export function createHttpPatch(params: ProxyAgentParams, originals: typeof http
 			}
 
 			const originalAgent = options.agent;
+
 			if (originalAgent === true) {
 				throw new Error('Unexpected agent option: true');
 			}
 			const isHttps = (originals.globalAgent as any).protocol === 'https:';
+
 			const optionsPatched = originalAgent instanceof PacProxyAgent;
+
 			const config = params.getProxySupport();
+
 			const useProxySettings = !optionsPatched && (config === 'override' || config === 'fallback' || (config === 'on' && originalAgent === undefined));
+
 			const addCertificatesV1 = !optionsPatched && params.addCertificatesV1() && isHttps && !(options as https.RequestOptions).ca && !(originalAgent instanceof originals.Agent && (originalAgent as https.Agent).options?.ca);
 
 			if (useProxySettings || addCertificatesV1) {
 				if (url) {
 					const parsed = typeof url === 'string' ? new nodeurl.URL(url) : url;
+
 					const urlOptions = {
 						protocol: parsed.protocol,
 						hostname: parsed.hostname.lastIndexOf('[', 0) === 0 ? parsed.hostname.slice(1, -1) : parsed.hostname,
 						port: parsed.port,
 						path: `${parsed.pathname}${parsed.search}`
 					};
+
 					if (parsed.username || parsed.password) {
 						options.auth = `${parsed.username}:${parsed.password}`;
 					}
@@ -382,7 +438,9 @@ export function createHttpPatch(params: ProxyAgentParams, originals: typeof http
 					options = { ...options };
 				}
 				const resolveP = (req: http.ClientRequest, opts: http.RequestOptions, url: string): Promise<string | undefined> => new Promise<string | undefined>(resolve => resolveProxy({ useProxySettings, addCertificatesV1 }, req, opts, url, resolve));
+
 				const host = options.hostname || options.host;
+
 				const isLocalhost = !host || host === 'localhost' || host === '127.0.0.1'; // Avoiding https://github.com/microsoft/vscode/issues/120354
 				const agent = createPacProxyAgent(resolveP, {
 					originalAgent: (!useProxySettings || isLocalhost || config === 'fallback') ? originalAgent : undefined,
@@ -413,8 +471,11 @@ export function createNetPatch(params: ProxyAgentParams, originals: typeof net) 
 
 function patchNetConnect(params: ProxyAgentParams, original: typeof net.connect): typeof net.connect {
     function connect(options: net.NetConnectOpts, connectionListener?: () => void): net.Socket;
+
     function connect(port: number, host?: string, connectionListener?: () => void): net.Socket;
+
     function connect(path: string, connectionListener?: () => void): net.Socket;
+
 	function connect(...args: any[]): net.Socket {
 		if (params.getLogLevel() === LogLevel.Trace) {
 			params.log.trace('ProxyResolver#net.connect', toLogString(args));
@@ -424,9 +485,11 @@ function patchNetConnect(params: ProxyAgentParams, original: typeof net.connect)
 		}
 		const socket = new net.Socket();
 		(socket as any).connecting = true;
+
 		getOrLoadAdditionalCertificates(params)
 			.then(() => {
 				const options: net.NetConnectOpts | undefined = args.find(arg => arg && typeof arg === 'object');
+
 				if (options?.timeout) {
 					socket.setTimeout(options.timeout);
 				}
@@ -435,6 +498,7 @@ function patchNetConnect(params: ProxyAgentParams, original: typeof net.connect)
 			.catch(err => {
 				params.log.error('ProxyResolver#net.connect', toErrorMessage(err));
 			});
+
 		return socket;
 	}
 	return connect;
@@ -449,20 +513,27 @@ export function createTlsPatch(params: ProxyAgentParams, originals: typeof tls) 
 
 function patchTlsConnect(params: ProxyAgentParams, original: typeof tls.connect): typeof tls.connect {
 	function connect(options: tls.ConnectionOptions, secureConnectListener?: () => void): tls.TLSSocket;
+
 	function connect(port: number, host?: string, options?: tls.ConnectionOptions, secureConnectListener?: () => void): tls.TLSSocket;
+
 	function connect(port: number, options?: tls.ConnectionOptions, secureConnectListener?: () => void): tls.TLSSocket;
+
 	function connect(...args: any[]): tls.TLSSocket {
 		if (params.getLogLevel() === LogLevel.Trace) {
 			params.log.trace('ProxyResolver#tls.connect', toLogString(args));
 		}
 		let options: tls.ConnectionOptions | undefined = args.find(arg => arg && typeof arg === 'object');
+
 		if (!params.addCertificatesV2() || options?.ca) {
 			return original.apply(null, arguments as any);
 		}
 		let secureConnectListener: (() => void) | undefined = args.find(arg => typeof arg === 'function');
+
 		if (!options) {
 			options = {};
+
 			const listenerIndex = args.findIndex(arg => typeof arg === 'function');
+
 			if (listenerIndex !== -1) {
 				args[listenerIndex - 1] = options;
 			} else {
@@ -476,8 +547,11 @@ function patchTlsConnect(params: ProxyAgentParams, original: typeof tls.connect)
 		const port = typeof args[0] === 'number' ? args[0]
 			: typeof args[0] === 'string' && !isNaN(Number(args[0])) ? Number(args[0]) // E.g., http2 module passes port as string.
 			: options.port;
+
 		const host = typeof args[1] === 'string' ? args[1] : options.host;
+
 		let tlsSocket: tls.TLSSocket;
+
 		if (options.socket) {
 			if (!options.secureContext) {
 				options.secureContext = tls.createSecureContext(options);
@@ -486,12 +560,14 @@ function patchTlsConnect(params: ProxyAgentParams, original: typeof tls.connect)
 				params.log.trace('ProxyResolver#tls.connect waiting for existing socket connect');
 				options.socket.once('connect' , () => {
 					params.log.trace('ProxyResolver#tls.connect got existing socket connect - adding certs');
+
 					for (const cert of _certificates || []) {
 						options!.secureContext!.context.addCACert(cert);
 					}
 				});
 			} else {
 				params.log.trace('ProxyResolver#tls.connect existing socket already connected - adding certs');
+
 				for (const cert of _certificates) {
 					options!.secureContext!.context.addCACert(cert);
 				}
@@ -501,11 +577,14 @@ function patchTlsConnect(params: ProxyAgentParams, original: typeof tls.connect)
 				options.secureContext = tls.createSecureContext(options);
 			}
 			params.log.trace('ProxyResolver#tls.connect creating unconnected socket');
+
 			const socket = options.socket = new net.Socket();
 			(socket as any).connecting = true;
+
 			getOrLoadAdditionalCertificates(params)
 				.then(caCertificates => {
 					params.log.trace('ProxyResolver#tls.connect adding certs before connecting socket');
+
 					for (const cert of caCertificates) {
 						options!.secureContext!.context.addCACert(cert);
 					}
@@ -540,7 +619,9 @@ function patchTlsConnect(params: ProxyAgentParams, original: typeof tls.connect)
 function patchCreateSecureContext(original: typeof tls.createSecureContext): typeof tls.createSecureContext {
 	return function (details?: tls.SecureContextOptions): ReturnType<typeof tls.createSecureContext> {
 		const context = original.apply(null, arguments as any);
+
 		const certs = (details as SecureContextOptionsPatch)?._vscodeAdditionalCaCerts;
+
 		if (certs) {
 			for (const cert of certs) {
 				context.context.addCACert(cert);
@@ -570,6 +651,7 @@ function addCertificatesV1(params: ProxyAgentParams, addCertificatesV1: boolean,
 }
 
 let _certificatesPromise: Promise<string[]> | undefined;
+
 let _certificates: string[] | undefined;
 export async function getOrLoadAdditionalCertificates(params: ProxyAgentParams) {
 	if (!_certificatesPromise) {
@@ -591,22 +673,29 @@ export async function loadSystemCertificates(params: CertificateParams) {
 			try {
 				const certs = await readSystemCertificates();
 				params.log.debug('ProxyResolver#loadSystemCertificates count', certs.length);
+
 				const now = Date.now();
+
 				const filtered = certs
 					.filter(cert => {
 						try {
 							const parsedCert = new crypto.X509Certificate(cert);
+
 							const parsedDate = Date.parse(parsedCert.validTo);
+
 							return isNaN(parsedDate) || parsedDate > now;
 						} catch (err) {
 							params.log.debug('ProxyResolver#loadSystemCertificates parse error', toErrorMessage(err));
+
 							return false;
 						}
 					});
 				params.log.debug('ProxyResolver#loadSystemCertificates count filtered', filtered.length);
+
 				return filtered;
 			} catch (err) {
 				params.log.error('ProxyResolver#loadSystemCertificates error', toErrorMessage(err));
+
 				return [];
 			}
 		})();
@@ -638,9 +727,12 @@ async function readWindowsCaCertificates() {
 	const winCA = await import('@vscode/windows-ca-certs');
 
 	let ders: any[] = [];
+
 	const store = new winCA.Crypt32();
+
 	try {
 		let der: any;
+
 		while (der = store.next()) {
 			ders.push(der);
 		}
@@ -649,20 +741,24 @@ async function readWindowsCaCertificates() {
 	}
 
 	const certs = new Set(ders.map(derToPem));
+
 	return Array.from(certs);
 }
 
 async function readMacCaCertificates() {
 	const stdout = await new Promise<string>((resolve, reject) => {
 		const child = cp.spawn('/usr/bin/security', ['find-certificate', '-a', '-p']);
+
 		const stdout: string[] = [];
 		child.stdout.setEncoding('utf8');
 		child.stdout.on('data', str => stdout.push(str));
 		child.on('error', reject);
 		child.on('exit', code => code ? reject(code) : resolve(stdout.join('')));
 	});
+
 	const certs = new Set(stdout.split(/(?=-----BEGIN CERTIFICATE-----)/g)
 		.filter(pem => !!pem.length));
+
 	return Array.from(certs);
 }
 
@@ -676,8 +772,10 @@ async function readLinuxCaCertificates() {
 	for (const certPath of linuxCaCertificatePaths) {
 		try {
 			const content = await fs.promises.readFile(certPath, { encoding: 'utf8' });
+
 			const certs = new Set(content.split(/(?=-----BEGIN CERTIFICATE-----)/g)
 				.filter(pem => !!pem.length));
+
 			return Array.from(certs);
 		} catch (err: any) {
 			if (err?.code !== 'ENOENT') {
@@ -690,11 +788,14 @@ async function readLinuxCaCertificates() {
 
 function derToPem(blob: Buffer) {
 	const lines = ['-----BEGIN CERTIFICATE-----'];
+
 	const der = blob.toString('base64');
+
 	for (let i = 0; i < der.length; i += 64) {
 		lines.push(der.substr(i, 64));
 	}
 	lines.push('-----END CERTIFICATE-----', '');
+
 	return lines.join(os.EOL);
 }
 
@@ -705,6 +806,7 @@ function toErrorMessage(err: any) {
 export function toLogString(args: any[]) {
 	return `[${args.map(arg => JSON.stringify(arg, (key, value) => {
 			const t = typeof value;
+
 			if (t === 'object') {
 				if (key) {
 					if ((key === 'ca' || key === '_vscodeAdditionalCaCerts') && Array.isArray(value)) {
@@ -726,6 +828,7 @@ export function toLogString(args: any[]) {
 			}
 			if (t === 'string' && value.length > 25) {
 				const len = `[${value.length} chars]`;
+
 				return `${value.substr(0, 25 - len.length)}${len}`;
 			}
 			return value;

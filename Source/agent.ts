@@ -59,9 +59,13 @@ export class PacProxyAgent extends Agent {
 
 		// Calculate the `url` parameter
 		const defaultPort = secureEndpoint ? 443 : 80;
+
 		let path = req.path;
+
 		let search: string | null = null;
+
 		const firstQuestion = path.indexOf("?");
+
 		if (firstQuestion !== -1) {
 			search = path.substring(firstQuestion);
 			path = path.substring(0, firstQuestion);
@@ -81,17 +85,21 @@ export class PacProxyAgent extends Agent {
 			// set `port` to null when it is the protocol default port (80 / 443)
 			port: defaultPort === opts.port ? null : opts.port,
 		};
+
 		const url = format(urlOpts);
 
 		debug("url: %o", url);
+
 		let result = await this.resolver(req, opts, url);
 
 		const { proxy, url: proxyURL } = getProxyURLFromResolverResult(result);
 
 		let agent: http.Agent | null = null;
+
 		if (!proxyURL) {
 			// Needed for SNI.
 			const originalAgent = this.opts.originalAgent;
+
 			const defaultAgent = secureEndpoint ? https.globalAgent : http.globalAgent;
 			agent = originalAgent === false ? new (defaultAgent as any).constructor() : (originalAgent || defaultAgent)
 		} else if (proxyURL.startsWith('socks')) {
@@ -110,12 +118,14 @@ export class PacProxyAgent extends Agent {
 		try {
 			if (agent) {
 				let s: Duplex | http.Agent;
+
 				if (agent instanceof Agent) {
 					s = await agent.connect(req, opts);
 				} else {
 					s = agent;
 				}
 				req.emit('proxy', { proxy, socket: s });
+
 				return s;
 			}
 			throw new Error(`Could not determine proxy type for: ${proxy}`);
@@ -182,7 +192,9 @@ class HttpsProxyAgent2<Uri extends string> extends HttpsProxyAgent<Uri> {
 
 	constructor(proxy: Uri | URL, opts: HttpsProxyAgentOptions2<Uri>) {
 		const addHeaders = {};
+
 		const origHeaders = opts?.headers;
+
 		const agentOpts: HttpsProxyAgentOptions<Uri> = {
 			...opts,
 			headers: (): http.OutgoingHttpHeaders => {
@@ -191,12 +203,14 @@ class HttpsProxyAgent2<Uri extends string> extends HttpsProxyAgent<Uri> {
 						? origHeaders()
 						: origHeaders
 					: {};
+
 				return {
 					...headers,
 					...addHeaders,
 				};
 			},
 		};
+
 		super(proxy, agentOpts);
 		this.addHeaders = addHeaders;
 		this.lookupProxyAuthorization = opts.lookupProxyAuthorization;
@@ -208,10 +222,12 @@ class HttpsProxyAgent2<Uri extends string> extends HttpsProxyAgent<Uri> {
 		state: Record<string, any> = {},
 	): Promise<net.Socket> {
 		const tmpReq = new EventEmitter();
+
 		let connect: ConnectResponse | undefined;
 		tmpReq.once("proxyConnect", (_connect: ConnectResponse) => {
 			connect = _connect;
 		});
+
 		if (
 			this.lookupProxyAuthorization &&
 			!this.addHeaders["Proxy-Authorization"]
@@ -222,6 +238,7 @@ class HttpsProxyAgent2<Uri extends string> extends HttpsProxyAgent<Uri> {
 					undefined,
 					state,
 				);
+
 				if (proxyAuthorization) {
 					this.addHeaders["Proxy-Authorization"] = proxyAuthorization;
 				}
@@ -230,10 +247,12 @@ class HttpsProxyAgent2<Uri extends string> extends HttpsProxyAgent<Uri> {
 			}
 		}
 		const s = await super.connect(tmpReq as any, opts);
+
 		const proxyAuthenticate = connect?.headers["proxy-authenticate"] as
 			| string
 			| string[]
 			| undefined;
+
 		if (
 			this.lookupProxyAuthorization &&
 			connect?.statusCode === 407 &&
@@ -245,10 +264,12 @@ class HttpsProxyAgent2<Uri extends string> extends HttpsProxyAgent<Uri> {
 					proxyAuthenticate,
 					state,
 				);
+
 				if (proxyAuthorization) {
 					this.addHeaders["Proxy-Authorization"] = proxyAuthorization;
 					tmpReq.removeAllListeners();
 					s.destroy();
+
 					return this.connect(req, opts, state);
 				}
 			} catch (err) {
@@ -256,6 +277,7 @@ class HttpsProxyAgent2<Uri extends string> extends HttpsProxyAgent<Uri> {
 			}
 		}
 		req.once("socket", (s) => tmpReq.emit("socket", s));
+
 		return s;
 	}
 }
