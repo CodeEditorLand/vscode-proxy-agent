@@ -100,12 +100,17 @@ export class PacProxyAgent extends Agent {
 			// Needed for SNI.
 			const originalAgent = this.opts.originalAgent;
 
-			const defaultAgent = secureEndpoint ? https.globalAgent : http.globalAgent;
-			agent = originalAgent === false ? new (defaultAgent as any).constructor() : (originalAgent || defaultAgent)
-		} else if (proxyURL.startsWith('socks')) {
+			const defaultAgent = secureEndpoint
+				? https.globalAgent
+				: http.globalAgent;
+			agent =
+				originalAgent === false
+					? new (defaultAgent as any).constructor()
+					: originalAgent || defaultAgent;
+		} else if (proxyURL.startsWith("socks")) {
 			// Use a SOCKSv5h or SOCKSv4a proxy
 			agent = new SocksProxyAgent(proxyURL);
-		} else if (proxyURL.startsWith('http')) {
+		} else if (proxyURL.startsWith("http")) {
 			// Use an HTTP or HTTPS proxy
 			// http://dev.chromium.org/developers/design-documents/secure-web-proxy
 			if (secureEndpoint) {
@@ -124,24 +129,26 @@ export class PacProxyAgent extends Agent {
 				} else {
 					s = agent;
 				}
-				req.emit('proxy', { proxy, socket: s });
+				req.emit("proxy", { proxy, socket: s });
 
 				return s;
 			}
 			throw new Error(`Could not determine proxy type for: ${proxy}`);
 		} catch (err) {
-			debug('Got error for proxy %o: %o', proxy, err);
-			req.emit('proxy', { proxy, error: err });
+			debug("Got error for proxy %o: %o", proxy, err);
+			req.emit("proxy", { proxy, error: err });
 		}
 
-		throw new Error(`Failed to establish a socket connection to proxies: ${result}`);
+		throw new Error(
+			`Failed to establish a socket connection to proxies: ${result}`,
+		);
 	}
 }
 
 export function getProxyURLFromResolverResult(result: string | undefined) {
 	// Default to "DIRECT" if a falsey value was returned (or nothing)
 	if (!result) {
-		return { proxy: 'DIRECT', url: undefined };
+		return { proxy: "DIRECT", url: undefined };
 	}
 
 	const proxies = String(result)
@@ -151,30 +158,33 @@ export function getProxyURLFromResolverResult(result: string | undefined) {
 
 	for (const proxy of proxies) {
 		const [type, target] = proxy.split(/\s+/);
-		debug('Attempting to use proxy: %o', proxy);
+		debug("Attempting to use proxy: %o", proxy);
 
-		if (type === 'DIRECT') {
+		if (type === "DIRECT") {
 			return { proxy, url: undefined };
-		} else if (type === 'SOCKS' || type === 'SOCKS5') {
+		} else if (type === "SOCKS" || type === "SOCKS5") {
 			// Use a SOCKSv5h proxy
 			return { proxy, url: `socks://${target}` };
-		} else if (type === 'SOCKS4') {
+		} else if (type === "SOCKS4") {
 			// Use a SOCKSv4a proxy
 			return { proxy, url: `socks4a://${target}` };
-		} else if (
-			type === 'PROXY' ||
-			type === 'HTTP' ||
-			type === 'HTTPS'
-		) {
+		} else if (type === "PROXY" || type === "HTTP" || type === "HTTPS") {
 			// Use an HTTP or HTTPS proxy
 			// http://dev.chromium.org/developers/design-documents/secure-web-proxy
-			return { proxy, url: `${type === 'HTTPS' ? 'https' : 'http'}://${target}` };
+			return {
+				proxy,
+				url: `${type === "HTTPS" ? "https" : "http"}://${target}`,
+			};
 		}
 	}
-	return { proxy: 'DIRECT', url: undefined };
+	return { proxy: "DIRECT", url: undefined };
 }
 
-type LookupProxyAuthorization = (proxyURL: string, proxyAuthenticate: string | string[] | undefined, state: Record<string, any>) => Promise<string | undefined>;
+type LookupProxyAuthorization = (
+	proxyURL: string,
+	proxyAuthenticate: string | string[] | undefined,
+	state: Record<string, any>,
+) => Promise<string | undefined>;
 
 type HttpsProxyAgentOptions2<Uri> = HttpsProxyAgentOptions<Uri> & {
 	lookupProxyAuthorization?: LookupProxyAuthorization;
@@ -284,7 +294,7 @@ class HttpsProxyAgent2<Uri extends string> extends HttpsProxyAgent<Uri> {
 
 export function createPacProxyAgent(
 	resolver: FindProxyForURL,
-	opts?: PacProxyAgentOptions
+	opts?: PacProxyAgentOptions,
 ): PacProxyAgent {
 	if (!opts) {
 		opts = {};
@@ -296,10 +306,9 @@ export function createPacProxyAgent(
 
 	return new PacProxyAgent(resolver, opts);
 }
-type PacProxyAgentOptions =
-		HttpProxyAgentOptions<''> &
-		HttpsProxyAgentOptions2<''> &
-		SocksProxyAgentOptions & {
-	fallbackToDirect?: boolean;
-	originalAgent?: false | http.Agent;
-}
+type PacProxyAgentOptions = HttpProxyAgentOptions<""> &
+	HttpsProxyAgentOptions2<""> &
+	SocksProxyAgentOptions & {
+		fallbackToDirect?: boolean;
+		originalAgent?: false | http.Agent;
+	};
