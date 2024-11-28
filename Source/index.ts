@@ -857,6 +857,7 @@ function addCertificatesV1(
 
 let _certificatesPromise: Promise<string[]> | undefined;
 let _certificates: string[] | undefined;
+
 export async function getOrLoadAdditionalCertificates(
 	params: ProxyAgentParams,
 ) {
@@ -873,6 +874,7 @@ export interface CertificateParams {
 }
 
 let _systemCertificatesPromise: Promise<string[]> | undefined;
+
 export async function loadSystemCertificates(params: CertificateParams) {
 	if (!_systemCertificatesPromise) {
 		_systemCertificatesPromise = (async () => {
