@@ -34,15 +34,20 @@ type FindProxyForURL = (
  */
 export class PacProxyAgent extends Agent {
 	resolver: FindProxyForURL;
+
 	opts: PacProxyAgentOptions;
+
 	cache?: Readable;
 
 	constructor(resolver: FindProxyForURL, opts: PacProxyAgentOptions = {}) {
 		super(opts);
+
 		debug("Creating PacProxyAgent with options %o", opts);
 
 		this.resolver = resolver;
+
 		this.opts = { ...opts };
+
 		this.cache = undefined;
 	}
 
@@ -68,6 +73,7 @@ export class PacProxyAgent extends Agent {
 
 		if (firstQuestion !== -1) {
 			search = path.substring(firstQuestion);
+
 			path = path.substring(0, firstQuestion);
 		}
 
@@ -103,6 +109,7 @@ export class PacProxyAgent extends Agent {
 			const defaultAgent = secureEndpoint
 				? https.globalAgent
 				: http.globalAgent;
+
 			agent =
 				originalAgent === false
 					? new (defaultAgent as any).constructor()
@@ -129,13 +136,16 @@ export class PacProxyAgent extends Agent {
 				} else {
 					s = agent;
 				}
+
 				req.emit("proxy", { proxy, socket: s });
 
 				return s;
 			}
+
 			throw new Error(`Could not determine proxy type for: ${proxy}`);
 		} catch (err) {
 			debug("Got error for proxy %o: %o", proxy, err);
+
 			req.emit("proxy", { proxy, error: err });
 		}
 
@@ -158,6 +168,7 @@ export function getProxyURLFromResolverResult(result: string | undefined) {
 
 	for (const proxy of proxies) {
 		const [type, target] = proxy.split(/\s+/);
+
 		debug("Attempting to use proxy: %o", proxy);
 
 		if (type === "DIRECT") {
@@ -177,6 +188,7 @@ export function getProxyURLFromResolverResult(result: string | undefined) {
 			};
 		}
 	}
+
 	return { proxy: "DIRECT", url: undefined };
 }
 
@@ -192,12 +204,15 @@ type HttpsProxyAgentOptions2<Uri> = HttpsProxyAgentOptions<Uri> & {
 
 interface ConnectResponse {
 	statusCode: number;
+
 	statusText: string;
+
 	headers: http.IncomingHttpHeaders;
 }
 
 class HttpsProxyAgent2<Uri extends string> extends HttpsProxyAgent<Uri> {
 	addHeaders: http.OutgoingHttpHeaders;
+
 	lookupProxyAuthorization?: LookupProxyAuthorization;
 
 	constructor(proxy: Uri | URL, opts: HttpsProxyAgentOptions2<Uri>) {
@@ -222,7 +237,9 @@ class HttpsProxyAgent2<Uri extends string> extends HttpsProxyAgent<Uri> {
 		};
 
 		super(proxy, agentOpts);
+
 		this.addHeaders = addHeaders;
+
 		this.lookupProxyAuthorization = opts.lookupProxyAuthorization;
 	}
 
@@ -234,6 +251,7 @@ class HttpsProxyAgent2<Uri extends string> extends HttpsProxyAgent<Uri> {
 		const tmpReq = new EventEmitter();
 
 		let connect: ConnectResponse | undefined;
+
 		tmpReq.once("proxyConnect", (_connect: ConnectResponse) => {
 			connect = _connect;
 		});
@@ -256,6 +274,7 @@ class HttpsProxyAgent2<Uri extends string> extends HttpsProxyAgent<Uri> {
 				req.emit("error", err);
 			}
 		}
+
 		const s = await super.connect(tmpReq as any, opts);
 
 		const proxyAuthenticate = connect?.headers["proxy-authenticate"] as
@@ -277,7 +296,9 @@ class HttpsProxyAgent2<Uri extends string> extends HttpsProxyAgent<Uri> {
 
 				if (proxyAuthorization) {
 					this.addHeaders["Proxy-Authorization"] = proxyAuthorization;
+
 					tmpReq.removeAllListeners();
+
 					s.destroy();
 
 					return this.connect(req, opts, state);
@@ -286,6 +307,7 @@ class HttpsProxyAgent2<Uri extends string> extends HttpsProxyAgent<Uri> {
 				req.emit("error", err);
 			}
 		}
+
 		req.once("socket", (s) => tmpReq.emit("socket", s));
 
 		return s;
@@ -310,5 +332,6 @@ type PacProxyAgentOptions = HttpProxyAgentOptions<""> &
 	HttpsProxyAgentOptions2<""> &
 	SocksProxyAgentOptions & {
 		fallbackToDirect?: boolean;
+
 		originalAgent?: false | http.Agent;
 	};
