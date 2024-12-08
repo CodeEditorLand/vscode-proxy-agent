@@ -138,7 +138,7 @@ export function createProxyResolver(params: ProxyAgentParams) {
 
 		const stackText = ''; // getLogLevel() === LogLevel.Trace ? '\n' + new Error('Error for stack trace').stack : '';
 
-		addCertificatesV1(params, flags.addCertificatesV1, opts, () => {
+		addCertificatesToOptionsV1(params, flags.addCertificatesV1, opts, () => {
 			if (!flags.useProxySettings) {
 				callback('DIRECT');
 				return;
@@ -395,7 +395,8 @@ export function createHttpPatch(params: ProxyAgentParams, originals: typeof http
 					originalAgent: (!useProxySettings || isLocalhost || config === 'fallback') ? originalAgent : undefined,
 					lookupProxyAuthorization: params.lookupProxyAuthorization,
 					// keepAlive: ((originalAgent || originals.globalAgent) as { keepAlive?: boolean }).keepAlive, // Skipping due to https://github.com/microsoft/vscode/issues/228872.
-				});
+					_vscodeTestReplaceCaCerts: (options as SecureContextOptionsPatch)._vscodeTestReplaceCaCerts,
+				}, opts => new Promise<void>(resolve => addCertificatesToOptionsV1(params, params.addCertificatesV1(), opts, resolve)));
 				agent.protocol = isHttps ? 'https:' : 'http:';
 				options.agent = agent
 				if (isHttps) {
@@ -597,8 +598,8 @@ export function createFetchPatch(params: ProxyAgentParams, originalFetch: typeof
 				uri: proxyURL,
 				allowH2,
 				headers: proxyAuthorization ? { 'Proxy-Authorization': proxyAuthorization } : undefined,
-				...(requestCA ? { requestTls: { ca: requestCA } } : {}),
-				...(proxyCA ? { proxyTls: { ca: proxyCA } } : {}),
+				requestTls: requestCA ? { allowH2, ca: requestCA } : { allowH2 },
+				proxyTls: proxyCA ? { allowH2, ca: proxyCA } : { allowH2 },
 				clientFactory: (origin: URL, opts: object): undici.Dispatcher => (new undici.Pool(origin, opts) as any).compose((dispatch: undici.Dispatcher['dispatch']) => {
 					class ProxyAuthHandler extends undici.DecoratorHandler {
 						private abort: ((err?: Error) => void) | undefined;
@@ -727,7 +728,7 @@ function getAgentOptions(systemCA: string[] | undefined, requestInit: RequestIni
 	return { allowH2, requestCA, proxyCA };
 }
 
-function addCertificatesV1(params: ProxyAgentParams, addCertificatesV1: boolean, opts: http.RequestOptions, callback: () => void) {
+function addCertificatesToOptionsV1(params: ProxyAgentParams, addCertificatesV1: boolean, opts: http.RequestOptions | tls.ConnectionOptions, callback: () => void) {
 	if (addCertificatesV1) {
 		getOrLoadAdditionalCertificates(params)
 			.then(caCertificates => {
