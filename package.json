@@ -19,7 +19,7 @@
 		"@types/node": "^20.8.4"
 	},
 	"main": "out/index.js",
-	"name": "@vscode/proxy-agent",
+	"name": "@codeeditorland/proxy-agent",
 	"optionalDependencies": {},
 	"scripts": {
 		"compile": "tsc -p ./"
