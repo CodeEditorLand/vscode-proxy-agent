@@ -13,7 +13,7 @@
 		"http-proxy-agent": "^7.0.2",
 		"https-proxy-agent": "^7.0.6",
 		"socks-proxy-agent": "^8.0.5",
-		"undici": "^7.2.0"
+		"undici": "^7.2.1"
 	},
 	"devDependencies": {
 		"@types/debug": "^4.1.12",
