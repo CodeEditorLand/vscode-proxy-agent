@@ -609,7 +609,7 @@ export function createFetchPatch(params: ProxyAgentParams, originalFetch: typeof
 				clientFactory: (origin: URL, opts: object): undici.Dispatcher => (new undici.Pool(origin, opts) as any).compose((dispatch: undici.Dispatcher['dispatch']) => {
 					class ProxyAuthHandler extends undici.DecoratorHandler {
 						private abort: ((err?: Error) => void) | undefined;
-						constructor(private dispatch: undici.Dispatcher['dispatch'], private options: undici.Dispatcher.DispatchOptions, private handler: undici.Dispatcher.DispatchHandlers) {
+						constructor(private dispatch: undici.Dispatcher['dispatch'], private options: undici.Dispatcher.DispatchOptions, private handler: undici.Dispatcher.DispatchHandler) {
 							super(handler);
 						}
 						onConnect(abort: (err?: Error) => void): void {
@@ -670,7 +670,7 @@ export function createFetchPatch(params: ProxyAgentParams, originalFetch: typeof
 							this.handler.onUpgrade?.(statusCode, headers, socket);
 						}
 					}
-					return function proxyAuthDispatch(options: undici.Dispatcher.DispatchOptions, handler: undici.Dispatcher.DispatchHandlers) {
+					return function proxyAuthDispatch(options: undici.Dispatcher.DispatchOptions, handler: undici.Dispatcher.DispatchHandler) {
 						return dispatch(options, new ProxyAuthHandler(dispatch, options, handler));
 					};
 				}),
@@ -721,15 +721,35 @@ function getAgentOptions(requestInit: RequestInit | undefined) {
 	let proxyCA: string | Buffer | Array<string | Buffer> | undefined;
 	let socketPath: string | undefined;
 	const dispatcher: undici.Dispatcher = (requestInit as any)?.dispatcher;
-	const originalAgentOptions: undici.Agent.Options | undefined = dispatcher && (dispatcher as any)[agentOptions];
-	if (originalAgentOptions) {
+	let originalAgentOptions: undici.Agent.Options | undefined = dispatcher && (dispatcher as any)[agentOptions];
+	if (dispatcher && !originalAgentOptions) {
+		// Handles bundled extension code where undici does not get patched.
+		const optionsSymbol = Object.getOwnPropertySymbols(dispatcher).find(s => s.description === 'options');
+		if (optionsSymbol) {
+			originalAgentOptions = (dispatcher as any)[optionsSymbol];
+		}
+	}
+	if (originalAgentOptions && typeof originalAgentOptions === 'object') {
 		allowH2 = originalAgentOptions.allowH2;
 		if (originalAgentOptions.connect && typeof originalAgentOptions.connect === 'object') {
 			requestCA = 'ca' in originalAgentOptions.connect && originalAgentOptions.connect.ca || undefined;
 			socketPath = originalAgentOptions.connect.socketPath || undefined;
 		}
 	}
-	const originalProxyAgentOptions: undici.ProxyAgent.Options | string | undefined = dispatcher && (dispatcher as any)[proxyAgentOptions];
+	let originalProxyAgentOptions: undici.ProxyAgent.Options | string | undefined = dispatcher && (dispatcher as any)[proxyAgentOptions];
+	if (dispatcher && !originalProxyAgentOptions) {
+		// Handles bundled extension code where undici does not get patched.
+		const proxyAgentSymbol = Object.getOwnPropertySymbols(dispatcher).find(s => s.description === 'proxy agent');
+		if (proxyAgentSymbol) {
+			const proxyAgent = (dispatcher as any)[proxyAgentSymbol];
+			if (proxyAgent && typeof proxyAgent === 'object') {
+				const optionsSymbol = Object.getOwnPropertySymbols(proxyAgent).find(s => s.description === 'options');
+				if (optionsSymbol) {
+					originalProxyAgentOptions = (proxyAgent as any)[optionsSymbol];
+				}
+			}
+		}
+	}
 	if (originalProxyAgentOptions && typeof originalProxyAgentOptions === 'object') {
 		allowH2 = originalProxyAgentOptions.allowH2;
 		requestCA = originalProxyAgentOptions.requestTls && 'ca' in originalProxyAgentOptions.requestTls && originalProxyAgentOptions.requestTls.ca || undefined;
